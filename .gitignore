@@ -1,0 +1,49 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
+# PostgreSQL data
+data/
+pgdata/
+*.sql
+*.dump
+
+# SSL/TLS certificates
+*.key
+*.crt
+*.pem
+*.cert
+*.csr
+
+# Logs
+*.log
+logs/
+
+# Docker volumes
+postgres_data/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Credentials and secrets
+credentials.txt
+*.password
