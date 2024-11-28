@@ -1,7 +1,7 @@
 services:
   postgres:
     build: 
-      context: .
+      context: ./docker
       dockerfile: Dockerfile
       args:
         POSTGRES_VERSION: ${POSTGRES_VERSION:-17-alpine}
@@ -46,6 +46,10 @@ services:
       - type: volume
         source: ${POSTGRES_VOLUME_NAME:-postgres_data}
         target: /var/lib/postgresql/data
+      - type: bind
+        source: ./docker/pg_hba.conf
+        target: /docker-entrypoint-initdb.d/pg_hba.conf
+        read_only: true
     shm_size: ${POSTGRES_SHM_SIZE:-256mb}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -h localhost"]

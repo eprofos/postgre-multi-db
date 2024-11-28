@@ -19,8 +19,8 @@ RUN mkdir -p /docker-entrypoint-initdb.d && \
     mkdir -p ${POSTGRESQL_SSL_DIR:-/var/lib/postgresql/ssl}
 
 # Copy configuration files and set permissions
-COPY pg_hba.conf /docker-entrypoint-initdb.d/
-COPY docker-entrypoint.sh /usr/local/bin/custom-entrypoint.sh
+COPY ./pg_hba.conf /docker-entrypoint-initdb.d/
+COPY ./docker-entrypoint.sh /usr/local/bin/custom-entrypoint.sh
 RUN chmod 755 /usr/local/bin/custom-entrypoint.sh
 
 # Generate SSL certificates with configurable parameters
