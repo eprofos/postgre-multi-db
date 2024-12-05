@@ -30,8 +30,10 @@ jobs:
       - name: Build Docker image
         run: docker compose -f compose.yaml build
 
-      - name: Run Docker container
-        run: docker compose -f compose.yaml up -d
+      - name: Initialize and run containers
+        run: |
+          chmod +x init.sh
+          ./init.sh
 
       - name: Wait for PostgreSQL to be ready
         run: |
@@ -54,4 +56,10 @@ jobs:
 
       - name: Test SSL connection
         run: |
-          docker compose exec postgres psql "host=localhost port=5432 dbname=db1 user=user1 password=test123 sslmode=verify-full sslcert=/var/lib/postgresql/ssl/server.crt sslkey=/var/lib/postgresql/ssl/server.key sslrootcert=/var/lib/postgresql/.postgresql/root.crt" -c "\conninfo"
+          test -f certs/server.crt || (echo "SSL certificate not found" && exit 1)
+          docker compose exec postgres psql \
+            "host=localhost port=5432 dbname=db1 user=user1 sslmode=verify-full \
+            sslcert=/var/lib/postgresql/ssl/server.crt \
+            sslkey=/var/lib/postgresql/ssl/server.key \
+            sslrootcert=/var/lib/postgresql/.postgresql/root.crt" \
+            -c "\conninfo" | grep -q "SSL connection"
