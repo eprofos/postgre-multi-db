@@ -27,13 +27,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Create required directories
+        run: |
+          mkdir -p certs
+          chmod 755 certs
+
+      - name: Copy environment file
+        run: |
+          if [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            echo "Warning: .env.example not found, using default values"
+          fi
+
       - name: Build Docker image
         run: docker compose -f compose.yaml build
 
-      - name: Initialize and run containers
-        run: |
-          chmod +x init.sh
-          ./init.sh
+      - name: Start containers
+        run: docker compose -f compose.yaml up -d
 
       - name: Wait for PostgreSQL to be ready
         run: |
@@ -56,9 +67,17 @@ jobs:
 
       - name: Test SSL connection
         run: |
+          # Verify certificate exists
           test -f certs/server.crt || (echo "SSL certificate not found" && exit 1)
+          
+          # Test SSL connection with values from .env.example
+          source .env 2>/dev/null || true
           docker compose exec postgres psql \
-            "host=localhost port=5432 dbname=db1 user=user1 sslmode=verify-full \
+            "host=localhost \
+            port=${POSTGRES_PORT:-5432} \
+            dbname=${POSTGRES_MULTIPLE_DATABASES%%,*} \
+            user=${POSTGRES_USER:-postgres} \
+            sslmode=verify-full \
             sslcert=/var/lib/postgresql/ssl/server.crt \
             sslkey=/var/lib/postgresql/ssl/server.key \
             sslrootcert=/var/lib/postgresql/.postgresql/root.crt" \
