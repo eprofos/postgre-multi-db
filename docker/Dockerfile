@@ -16,7 +16,8 @@ RUN apk add --no-cache \
 RUN mkdir -p /docker-entrypoint-initdb.d && \
     mkdir -p ${POSTGRESQL_RUN_DIR:-/var/run/postgresql} && \
     mkdir -p ${POSTGRESQL_DATA_DIR:-/var/lib/postgresql/data}/pgdata && \
-    mkdir -p ${POSTGRESQL_SSL_DIR:-/var/lib/postgresql/ssl}
+    mkdir -p ${POSTGRESQL_SSL_DIR:-/var/lib/postgresql/ssl} && \
+    mkdir -p /var/lib/postgresql/.postgresql
 
 # Copy configuration files and set permissions
 COPY ./pg_hba.conf /docker-entrypoint-initdb.d/

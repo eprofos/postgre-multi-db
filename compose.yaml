@@ -50,6 +50,10 @@ services:
         source: ./docker/pg_hba.conf
         target: /docker-entrypoint-initdb.d/pg_hba.conf
         read_only: true
+      # Add new volume for SSL certificate
+      - type: bind
+        source: ./certs
+        target: /var/lib/postgresql/ssl
     shm_size: ${POSTGRES_SHM_SIZE:-256mb}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -h localhost"]

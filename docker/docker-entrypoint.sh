@@ -45,6 +45,11 @@ verify_ssl_config() {
     chmod "${SSL_KEY_MODE:-600}" "$key_file"
     chmod "${SSL_CERT_MODE:-644}" "$cert_file"
     log "SSL configuration verified successfully"
+    
+    # Copy certificate to .postgresql directory
+    cp "$cert_file" /var/lib/postgresql/.postgresql/root.crt
+    chmod 644 /var/lib/postgresql/.postgresql/root.crt
+    log "SSL certificate copied to .postgresql directory"
 }
 
 # Function to setup initial configuration
