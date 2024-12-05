@@ -1,0 +1,57 @@
+name: Test Docker Image
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Docker image
+        run: docker build --file docker/Dockerfile --tag postgre-multi-db .
+
+      - name: Run Docker container
+        run: docker run --name postgre-multi-db-container -d postgre-multi-db
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          for i in {1..30}; do
+            if docker exec postgre-multi-db-container pg_isready -U postgres; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+
+      - name: Check PostgreSQL health
+        run: docker exec postgre-multi-db-container pg_isready -U postgres
+
+      - name: Verify multiple databases
+        run: |
+          docker exec postgre-multi-db-container psql -U postgres -c "\l" | grep -q "db1"
+          docker exec postgre-multi-db-container psql -U postgres -c "\l" | grep -q "db2"
+          docker exec postgre-multi-db-container psql -U postgres -c "\l" | grep -q "db3"
+
+      - name: Test SSL connection
+        run: |
+          docker exec postgre-multi-db-container psql "host=localhost port=5432 dbname=db1 user=user1 password=test123 sslmode=verify-full sslcert=/var/lib/postgresql/ssl/server.crt sslkey=/var/lib/postgresql/ssl/server.key sslrootcert=/var/lib/postgresql/.postgresql/root.crt" -c "\conninfo"

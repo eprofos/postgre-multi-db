@@ -12,6 +12,7 @@ This repository contains a Docker-based PostgreSQL setup that supports multiple 
 - [Usage Examples](#usage-examples)
 - [Troubleshooting](#troubleshooting)
 - [Security Considerations](#security-considerations)
+- [CI/CD Workflow](#cicd-workflow)
 
 ## Prerequisites
 
@@ -92,8 +93,8 @@ SSL_KEY_BITS=2048
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd <repository-directory>
+git clone https://github.com/eprofos/postgre-multi-db
+cd postgre-multi-db
 ```
 
 2. Create your environment file:
@@ -238,3 +239,15 @@ docker compose exec postgres pg_restore \
 8. Maintain secure backups
 9. Configure appropriate resource limits
 10. Use environment-specific SSL certificates in production
+
+## CI/CD Workflow
+
+This repository includes a GitHub Actions workflow to test the Docker image. The workflow is defined in the `test-docker-image.yml` file located in the `.github/workflows` directory.
+
+The CI/CD workflow performs the following steps:
+- Builds the Docker image using the `docker/Dockerfile`.
+- Runs the container and checks its health.
+- Verifies the creation of multiple databases.
+- Tests SSL connection to one of the created databases.
+
+The workflow is triggered on every push and pull request to the `main` branch.
